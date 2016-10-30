@@ -14,10 +14,10 @@ class LearningAgent(Agent):
         # TODO: Initialize any additional variables here
         self.state = {}
         self.q_table = {}
-        self.discount_factor = 0.625
-        self.explore_rate = 0.0625
+        self.discount_factor = 0.0625
         self.learning_rate = 0.0625
-        self.stats = {'missed_deadline': 0, 'steps': 0, 'total_reward': 0, 'penalties': 0}
+        self.explore_rate = 0.0625
+        self.stats = {'missed_deadline': 0, 'steps': 0, 'total_reward': 0, 'violations': 0, 'crashes': 0}
 
     def reset(self, destination=None):
         self.planner.route_to(destination)
@@ -51,8 +51,14 @@ class LearningAgent(Agent):
         if deadline == 0:
             self.stats['missed_deadline'] += 1
 
-        if reward < 0:
-            self.stats['penalties'] += 1
+
+        if inputs['light'] == 'red' and action not in ('right', None):
+            self.stats['violations'] += 1
+        elif inputs['light'] == 'red' and action == 'right' and inputs['left'] != None:
+            self.stats['violations'] += 1
+        elif inputs['light'] == 'green' and action == 'left' and inputs['oncoming'] in ('right', 'forward'):
+            self.stats['violations'] += 1
+
         self.stats['steps'] += 1
         self.stats['total_reward'] += reward
 
@@ -102,10 +108,11 @@ def run():
     # NOTE: To quit midway, press Esc or close pygame window, or hit Ctrl+C on the command-line
 
 def print_stats(stats, trials=100):
-    print "Average reward per trial: {}".format(stats['total_reward'] / float(trials))
-    print "Average number of steps per trial: {}".format(stats['steps'] / float(trials))
-    print "Missed {}% of deadlines".format(stats['missed_deadline'] * 100. / trials)
-    print "Penalties received {}".format(stats['penalties'])
+    avg_reward = stats['total_reward'] / float(trials)
+    avg_steps = stats['steps'] / float(trials)
+    missed_per = stats['missed_deadline'] * 100. / trials
+    violations = stats['violations'] / float(trials)
+    print "{}\t{}\t{}%\t{}".format(avg_reward, avg_steps, missed_per, violations)
 
 if __name__ == '__main__':
     run()
