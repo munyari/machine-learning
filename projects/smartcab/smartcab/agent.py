@@ -14,9 +14,9 @@ class LearningAgent(Agent):
         # TODO: Initialize any additional variables here
         self.state = {}
         self.q_table = {}
-        self.discount_factor = 0.0625
+        self.discount_factor = 0.625
         self.learning_rate = 0.0625
-        self.explore_rate = 0.0625
+        self.explore_rate = 0.03
         self.stats = {'missed_deadline': 0, 'steps': 0, 'total_reward': 0, 'violations': 0, 'crashes': 0}
 
     def reset(self, destination=None):
@@ -64,11 +64,13 @@ class LearningAgent(Agent):
 
 
         # TODO: Learn policy based on state, action, reward
-        q_hat = self.q_table[(self.state, action)]
+        new_waypoint = self.planner.next_waypoint()
+        new_inputs = self.env.sense(self)
+        new_state = (new_inputs['light'], new_inputs['oncoming'], new_inputs['left'], new_waypoint)
+
         max_neighbor = self.best_known_action()[1]
 
-        q_hat += self.learning_rate * (reward + ((self.discount_factor*max_neighbor) - q_hat))
-        self.q_table[(self.state,action)] = q_hat
+        self.q_table[(self.state, action)] = (1-self.learning_rate) * (self.q_table[(self.state, action)] + self.learning_rate * (reward + self.discount_factor * max_neighbor))
 
         print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
 
@@ -101,7 +103,7 @@ def run():
     sim = Simulator(e, update_delay=0.0, display=False)  # create simulator (uses pygame when display=True, if available)
     # NOTE: To speed up simulation, reduce update_delay and/or set display=False
 
-    trials = 1000
+    trials = 10000
     sim.run(n_trials=trials)  # run for a specified number of trials
     print_stats(a.stats, trials)
 

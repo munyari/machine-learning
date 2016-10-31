@@ -32,6 +32,19 @@ light, the only move we're allowed to make is a ``'left'`` turn, but this again
 is
 unaffected by approaching traffic from the right.
 
+I have also chosen to keep `'deadline'` out of the state. My reasoning is
+that whether or not the deadline has actually passed should not affect the
+optimal strategy for maximizing the agent's reward. In general, the agent is
+attempting to minimize travel time, the approach of the deadline should not
+affect this motive. Further, with `enforce_deadline` set to `True` the
+simulation will end as soon as the deadline has been missed. Including the
+actual deadline value would increase the size of the state space by a very large
+amount, especially if the deadline can be arbitrarily large. This would make
+Q-learning much more difficult. Keeping a binary value that tells us whether or
+not we have failed to reached the deadline is also not helpful as stated
+previously; the failure of the trial will give us just as much information as
+keeping a binary variable would.
+
 ***OPTIONAL:*** _How many states in total exist for the **smartcab** in this
 environment? Does this number seem reasonable given that the goal of Q-Learning
 is to learn and make informed decisions about each state? Why or why not?_
@@ -70,37 +83,36 @@ the percentage of time that the smartcab does not make it to the destination in
 time. `'violations'` is the mean of the mean number traffic laws broken for each
 trial.
 
-| $\gamma$ | $\alpha$ | $1-\epsilon$ | avg. reward | avg. steps | missed deadline | violations |
-|----------|----------|--------------|-------------|------------|-----------------|------------|
-|        1 |        1 |            1 |       0.172 |     27.744 | 79.6%           |      7.457 |
-|        1 |        1 |            0 |     11.2285 |     25.388 | 62.1%           |      0.033 |
-|        1 |        1 |          0.5 |      13.709 |     23.559 | 48.8%           |      3.221 |
-|        1 |        1 |         0.75 |       7.443 |     26.263 | 67.3%           |      5.219 |
-|        1 |        1 |         0.25 |      14.735 |     23.439 | 47.2%           |      1.679 |
-|        1 |        1 |        0.125 |     16.0775 |     21.532 | 39.3%           |      0.752 |
-|        1 |        1 |       0.0625 |     20.2465 |     16.633 | 13.8%           |       0.32 |
-|        1 |        1 |      0.03125 |       16.66 |     18.664 | 30.9%           |      0.169 |
-|        1 |        1 |     0.046875 |      15.804 |     20.664 | 37.1%           |      0.297 |
-|        1 |        1 |         0.05 |      15.583 |     20.226 | 36.6%           |      0.315 |
-|      0.5 |        1 |       0.0625 |     21.2075 |     14.498 | 6.3%            |      2.258 |
-|     0.25 |        1 |       0.0625 |     21.4775 |     14.862 | 5.0%            |      2.607 |
-|     0.75 |        1 |       0.0625 |      22.525 |     14.514 | 4.3%            |        0.3 |
-|    0.875 |        1 |       0.0625 |        22.5 |     14.776 | 4.8%            |      0.305 |
-|    0.625 |        1 |       0.0625 |     21.6565 |     14.695 | 5.6%            |      2.834 |
-|    0.625 |      0.5 |       0.0625 |       22.29 |     13.813 | 2.0%            |      0.297 |
-|    0.625 |     0.75 |       0.0625 |     21.2845 |     14.541 | 4.2%            |      2.675 |
-|    0.625 |     0.25 |       0.0625 |     21.9775 |     14.131 | 1.5%            |      0.318 |
-|    0.625 |    0.125 |       0.0625 |      22.578 |     13.566 | 1.2%            |      0.356 |
-|    0.625 |   0.0625 |       0.0625 |     22.3385 |     14.006 | 1.9%            |       0.34 |
-|    0.625 |      0.1 |       0.0625 |     22.4805 |     14.034 | 2.1%            |      0.374 |
+| $\gamma$ | $\alpha$ | $1-\epsilon$ | avg. reward | avg. steps | missed deadlines | violations |
+|----------|----------|--------------|-------------|------------|------------------|------------|
+|        1 |        1 |            1 |       0.269 |     27.678 | 80.1%            |      7.526 |
+|        1 |        1 |            0 |       0.327 |     27.648 | 81.1%            |      7.454 |
+|        1 |        1 |          0.5 |     -0.0275 |     27.929 | 82.4%            |      7.532 |
+|        1 |        1 |         0.25 |      0.1015 |     27.536 | 80.6%            |      7.454 |
+|        1 |        1 |         0.75 |      0.5515 |     27.336 | 79.6%            |      7.287 |
+|        1 |        1 |        0.125 |      -0.068 |     27.951 | 81.0%            |      7.568 |
+|        1 |        1 |       0.0625 |       0.643 |     28.135 | 79.9%            |      7.418 |
+|        1 |        1 |       0.3125 |      1.0185 |     27.336 | 76.3%            |      7.291 |
+|        1 |      0.5 |         0.03 |     22.5955 |     13.042 | 1.1%             |      0.163 |
+|        1 |     0.25 |         0.03 |      22.157 |     13.108 | 1.2%             |      0.184 |
+|        1 |     0.75 |         0.03 |      21.109 |     14.532 | 4.6%             |      2.582 |
+|        1 |    0.125 |         0.03 |      22.385 |     13.274 | 1.0%             |      0.193 |
+|        1 |   0.0625 |         0.03 |     22.4475 |    13.775  | 1.0%             |      0.213 |
+|      0.5 |   0.0625 |         0.03 |      22.358 |     13.697 | 1.6%             |      0.271 |
+|     0.25 |   0.0625 |         0.03 |     22.3385 |     13.387 | 1.6%             |      0.269 |
+|     0.75 |   0.0625 |         0.03 |      22.413 |     13.522 | 1.3%             |      0.218 |
+|    0.625 |   0.0625 |         0.03 |      22.316 |     13.289 | 0.9%             |      0.248 |
 
-My final parameter selection is 0.625 for the discount factor, 0.0625
-explore rate (i.e. 0.9375 is $\epsilon$) and 0.125 learning rate.
+My final parameter selection is 0.625 for the discount factor, 0.03
+explore rate (i.e. 0.97 is $\epsilon$) and 0.0625 learning rate.
 
-The vehicle makes it to its destination before the deadline about 98.8% of the
-time. It has a traffic violation in about 1 in 3 trials. The total reward is
-between 22 and 23, and it takes between 13 and 14 steps to reach our
-destination.
+I ran a further 10,000 trials with this parameterization, and found
+an average reward of 22.3349, 13.11 average steps, 0.85% of deadlines missed and
+0.1543 violations per trial.
+
+The vehicle makes it to its destination before the deadline about 99.15% of the
+time. It has a traffic violation in about 2 in 13 trials. The total reward is
+between 22 and 23, and it takes about 13 steps to reach the destination.
 
 ***QUESTION:*** _Does your agent get close to finding an optimal policy, i.e.
 reach the destination in the minimum possible time, and not incur any penalties?
@@ -119,16 +131,16 @@ the implicit assumption that at every turn the cab can move 1 intersection
 closer to the destination).
 
 So with 6 moves established as a theoretical lower bound, how well does our
-smartcab do? With the parameters I ultimately chose, it makes about 13-14 moves
+smartcab do? With the parameters I ultimately chose, it makes about 13 moves
 on average. This is close to 2 times what the car could do if it was omniscient.
 Our smartcab cannot be omniscient however. Considering that the smartcab is
 learning its way as it goes along, I think that this performance is great!
 Recalling that the number of possible state-action pairs is 348, by the time the
-cab has made ~14 moves, it can't really have full information about the costs
+cab has made ~13 moves, it can't really have full information about the costs
 and rewards of its actions yet. The fact that it can on average make it to the
 destination with only about twice as many moves as strictly necessary, having
 seen only a small fraction of the state-action pairs possible means it is
-performing very well. Further, the cab only misses it's deadline about 1.2% of
+performing very well. Further, the cab only misses it's deadline about 0.85% of
 the time.
 
 An optimal policy for this problem would always make the right move, the one
@@ -148,4 +160,6 @@ like it would be against the spirit of the assignment. In the real world, the
 vehicle would not necessarily have *perfect* information about the intersection
 that it's at, and driving laws and best practices are probably a lot more
 complex
-than can be captured in a few if statements.
+than can be captured in a few if statements. It is still necessary for our agent
+to attempt *some* illegal moves so that it learns which moves are actually
+illegal.
