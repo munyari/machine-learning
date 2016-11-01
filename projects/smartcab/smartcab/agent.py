@@ -14,14 +14,15 @@ class LearningAgent(Agent):
         # TODO: Initialize any additional variables here
         self.state = {}
         self.q_table = {}
-        self.discount_factor = 0.625
-        self.learning_rate = 0.0625
-        self.explore_rate = 0.03
+        self.discount_factor = 0.25
+        self.learning_rate = 0.25
+        self.explore_rate = 0.03125
         self.stats = {'missed_deadline': 0, 'steps': 0, 'total_reward': 0, 'violations': 0, 'crashes': 0}
 
     def reset(self, destination=None):
         self.planner.route_to(destination)
         # TODO: Prepare for a new trip; reset any variables here, if required
+
 
     def update(self, t):
         # Gather inputs
@@ -70,9 +71,9 @@ class LearningAgent(Agent):
 
         max_neighbor = self.best_known_action()[1]
 
-        self.q_table[(self.state, action)] = (1-self.learning_rate) * (self.q_table[(self.state, action)] + self.learning_rate * (reward + self.discount_factor * max_neighbor))
+        self.q_table[(self.state, action)] = (1-self.learning_rate) * self.q_table[(self.state, action)] + self.learning_rate * (reward + self.discount_factor * max_neighbor)
 
-        print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
+        # print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
 
     def take_random_action(self):
         return random.choice([None, 'forward', 'left', 'right'])

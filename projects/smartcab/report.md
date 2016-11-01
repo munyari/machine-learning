@@ -72,7 +72,7 @@ random action to explore the unknown.
 basic implementation of Q-Learning. For which set of parameters does the agent
 perform best? How well does the final driving agent perform?_
 
-I ran 1000 trials for each setting of parameters.
+I ran 100 trials for each setting of parameters.
 
 Here $\gamma$ is the discount rate, $\alpha$ is the learning rate and $\epsilon$
 is the exploration rate (**NOTE:** in my code I used $1-\epsilon$ and called it
@@ -85,33 +85,32 @@ trial.
 
 | $\gamma$ | $\alpha$ | $1-\epsilon$ | avg. reward | avg. steps | missed deadlines | violations |
 |----------|----------|--------------|-------------|------------|------------------|------------|
-|        1 |        1 |            1 |       0.269 |     27.678 | 80.1%            |      7.526 |
-|        1 |        1 |            0 |       0.327 |     27.648 | 81.1%            |      7.454 |
-|        1 |        1 |          0.5 |     -0.0275 |     27.929 | 82.4%            |      7.532 |
-|        1 |        1 |         0.25 |      0.1015 |     27.536 | 80.6%            |      7.454 |
-|        1 |        1 |         0.75 |      0.5515 |     27.336 | 79.6%            |      7.287 |
-|        1 |        1 |        0.125 |      -0.068 |     27.951 | 81.0%            |      7.568 |
-|        1 |        1 |       0.0625 |       0.643 |     28.135 | 79.9%            |      7.418 |
-|        1 |        1 |       0.3125 |      1.0185 |     27.336 | 76.3%            |      7.291 |
-|        1 |      0.5 |         0.03 |     22.5955 |     13.042 | 1.1%             |      0.163 |
-|        1 |     0.25 |         0.03 |      22.157 |     13.108 | 1.2%             |      0.184 |
-|        1 |     0.75 |         0.03 |      21.109 |     14.532 | 4.6%             |      2.582 |
-|        1 |    0.125 |         0.03 |      22.385 |     13.274 | 1.0%             |      0.193 |
-|        1 |   0.0625 |         0.03 |     22.4475 |    13.775  | 1.0%             |      0.213 |
-|      0.5 |   0.0625 |         0.03 |      22.358 |     13.697 | 1.6%             |      0.271 |
-|     0.25 |   0.0625 |         0.03 |     22.3385 |     13.387 | 1.6%             |      0.269 |
-|     0.75 |   0.0625 |         0.03 |      22.413 |     13.522 | 1.3%             |      0.218 |
-|    0.625 |   0.0625 |         0.03 |      22.316 |     13.289 | 0.9%             |      0.248 |
+|        1 |        1 |            1 |       0.055 |      28.48 | 84.0%            |       7.84 |
+|        1 |        1 |          0.5 |      11.605 |      24.51 | 60.0%            |       3.13 |
+|        1 |        1 |         0.75 |        5.15 |      27.34 | 77.0%            |       5.21 |
+|        1 |        1 |         0.25 |      14.382 |     23.433 | 49.3%            |      1.638 |
+|        1 |        1 |        0.125 |       15.54 |      21.58 | 39.0%            |       0.83 |
+|        1 |        1 |       0.0625 |       16.22 |      20.64 | 34.0%            |       0.57 |
+|        1 |        1 |      0.03125 |      17.705 |      17.28 | 22.0%            |       0.31 |
+|        1 |        1 |         0.03 |      16.735 |      19.76 | 32.1%            |      0.164 |
+|        1 |        1 |         0.01 |      16.504 |     19.671 | 32.1%            |      0.088 |
+|      0.5 |        1 |      0.03125 |       22.87 |      15.08 | 2.0%             |       0.27 |
+|     0.25 |        1 |      0.03125 |      21.815 |      12.42 | 1.0%             |       0.22 |
+|    0.125 |        1 |      0.03125 |       21.47 |      13.68 | 6.0%             |       0.95 |
+|   0.1875 |        1 |      0.03125 |       22.93 |      13.94 | 1.0%             |        0.7 |
+|     0.25 |      0.5 |      0.03125 |       22.72 |      12.92 | 1.0%             |       0.26 |
+|     0.25 |     0.25 |      0.03125 |      21.925 |      13.59 | 2.0%             |       0.33 |
 
-My final parameter selection is 0.625 for the discount factor, 0.03
-explore rate (i.e. 0.97 is $\epsilon$) and 0.0625 learning rate.
+
+My final parameter selection is 0.25 for the discount factor, 0.03125
+explore rate (i.e. 0.96875 is $\epsilon$) and 0.5 learning rate.
 
 I ran a further 10,000 trials with this parameterization, and found
-an average reward of 22.3349, 13.11 average steps, 0.85% of deadlines missed and
-0.1543 violations per trial.
+an average reward of 22.3196, 13.25 average steps, 0.77% of deadlines missed and
+0.1361 violations per trial.
 
-The vehicle makes it to its destination before the deadline about 99.15% of the
-time. It has a traffic violation in about 2 in 13 trials. The total reward is
+The vehicle makes it to its destination before the deadline about 99.23% of the
+time. It has a traffic violation in about 1 in 7 trials. The total reward is
 between 22 and 23, and it takes about 13 steps to reach the destination.
 
 ***QUESTION:*** _Does your agent get close to finding an optimal policy, i.e.
@@ -140,7 +139,7 @@ cab has made ~13 moves, it can't really have full information about the costs
 and rewards of its actions yet. The fact that it can on average make it to the
 destination with only about twice as many moves as strictly necessary, having
 seen only a small fraction of the state-action pairs possible means it is
-performing very well. Further, the cab only misses it's deadline about 0.85% of
+performing very well. Further, the cab only misses it's deadline about 0.77% of
 the time.
 
 An optimal policy for this problem would always make the right move, the one
