@@ -48,14 +48,17 @@ particularly could be used for the greater good of society.
 ### Problem Statement
 
 My problem is to identify how aid from the government to universities influences
-graduation rates, and student debt. Specifically, I want to investigate whether
-state and federal governments can increase completion rates or decrease student
-loan burdens
-without increasing their overall spending on tertiary education.
+graduation rates, and student debt. Specifically, I want to build a model to
+predict graduation rates and tuition costs for students from the various levels
+of aid spending that an institution receives from the government. This will help
+me to understand in which situations government aid programs are most useful. My
+problem is one of regression -- I want to find the function that
+maps various types of government-funded financial aid to graduation rates and
+tuition costs, if one exists.
 
 ### Datasets and Inputs
 
-I will use the [Delta Cost Project Database][delta]. This extensive dataset
+I will use the Delta Cost Project Database[^delta]. This extensive dataset
 includes 215,613 records, one for each institution of higher education for each
 academic year from 1987 to 2012. It also has 974 variables, which include
 details such as enrollment, graduation numbers and rates, student financial aid
@@ -65,7 +68,7 @@ Institute of Education Sciences. This data set will provide me with information
 about the different completion rates, enrollments, and tuition and fees of each
 institution.
 
-[delta]: http://nces.ed.gov/ipeds/deltacostproject/
+[^delta]: http://nces.ed.gov/ipeds/deltacostproject/
 
 [@deangelo_completing_2011] and [@franke_towards_2012] have discussed similar
 problems.
@@ -73,20 +76,25 @@ problems.
 ### Solution Statement
 
 Solving this problem would require successfully identifying the relationship
-between funding from the government on one hand, and low costs for students and
-high completion rates on the other. If I can find the relationship between
-government aid funding and institutional performance, I should be able to show
-in which conditions increasing funding will have little to no impact and is
+between funding from the government on one hand, and costs for students and
+completion rates on the other. If I can find the relationship between
+government aid funding and institutional performance, this will give some
+indication of the conditions where aid spending is most useful, and
+the conditions where increasing funding will have little to no impact and is
 therefore wasteful.
+
+Because my desired output variables are continuous (graduation rates and tuition
+costs), I will need to make use of regression. I will employ several different
+regression algorithms and compare their performance. The algorithms I intend to
+explore are stochastic gradient descent, AdaBoost, support vectors and random
+forests. I have no reason to believe any of these algorithms is particularly
+well-suited to this problem, so I've chosen a variety of algorithms so that I may compare their performance.
 
 ### Benchmark Model
 
-As a benchmark, we will assume that total government aid is linearly related to
-completed rates and tuition costs. That is, a doubling of government aid leads
-to a doubling of completion rates and a halving of tuition costs. This is then
-easily measurable -- controlling for other variables, we can confirm this model
-by observing that similar schools with different amounts of total aid have
-proportional completion rates and tuition costs.
+As such, I will use ordinary least squares
+(OLS) regression as the benchmark model. I will compare each of my chosen
+models to this benchmark using the evaluation metrics described below.
 
 ### Evaluation Metrics
 
@@ -96,10 +104,10 @@ so lends itself well to these scoring methods, which are based on the
 differences between a prediction and the actual value of a label. As its name
 suggests, explained variance is a measure of how much of the variability in a
 function is captured by the input parameters. The more of the variance that can
-be explained, the better the model is performing. From [sklearn's
-documentation][exp], the formula for explained variance is given by
+be explained, the better the model is performing. From sklearn's
+documentation[^exp], the formula for explained variance is given by
 
-[exp]: http://scikit-learn.org/stable/modules/model_evaluation.html#explained-variance-score
+[^exp]: http://scikit-learn.org/stable/modules/model_evaluation.html#explained-variance-score
 
 \begin{align*}
   \operatorname{explained\_variance}(y, \hat{y}) = 1 -
@@ -126,9 +134,6 @@ successfully predict future values. It is given by
 with
 $\bar{y}=\frac{1}{n_{\text{samples}}}\sum\nolimits_{i=0}^{n_{\text{samples}}-1}y_i$.
 
-
-[expr]: http://scikit-learn.org/stable/modules/model_evaluation.html#explained-variance-score/
-
 ### Project Design
 
 The Delta dataset has 974 dimensions, yet not all of those variables are
@@ -139,29 +144,41 @@ It will also be necessary to find and correct any transcription errors in the
 data. Misentered data is not always easy to recognize, but if we know that
 variables fall into some range, a value outside of that range is a red flag. For
 example, if we know that a variable's value can range from 0 to 1, then a value
-of 86 is a transcription error. According to [Wikipedia][wiki], the largest
+of 86 is a transcription error. According to Wikipedia[^wiki], the largest
 university enrollment in the United States is at the University of Central
-Florida with 63,000 students. The [Huffington Post][huffpo] lists Alaska Bible
+Florida with 63,000 students. The Huffington Post[^huffpo] lists Alaska Bible
 College as the smallest accredited university in the United States, with 38
 students enrolled. We can see that there are 3 orders of magnitude between the
 largest and smallest university. If we recognize that the range of a variable is
 much greater, or that there are extreme outliers that are themselves orders of
 magnitude greater than the 75th percentile, this will provide another red flag.
 
-Next, I will plot some of the data in search of interesting patterns. I may
+[^wiki]: https://en.wikipedia.org/wiki/List_of_United_States_university_campuses_by_enrollment
+[^huffpo]: http://www.huffingtonpost.com/2012/03/05/the-12-smallest-colleges_n_1320774.html
+
+Because of the high dimensionality of the dataset, I will want to eliminate some
+of the features. I will attempt to select features that are relevant, using
+sklearn's feature selection module.[^fs] I will use `SelectKBest` with
+`mututal_info_regression` to select an appropriate number of features. I haven't
+decided yet how many features should be used, but I may attempt to run my
+models with many different numbers of features and compare the model's performance based on feature selection.
+
+[^fs]: http://scikit-learn.org/stable/modules/classes.html#module-sklearn.feature_selection
+
+
+At this point, I will run some visualizations on the data. I may
 choose to use a smaller subset of the data for plotting purposes, as the data
-set may be too large to clearly visualize. Here's an example plot:
+set may be too large to clearly visualize. Figure 1 shows an example plot.
 
 ![Graduation rates vs. total student aid](./figure_2.png)
 
-[wiki]: https://en.wikipedia.org/wiki/List_of_United_States_university_campuses_by_enrollment
-[huffpo]: http://www.huffingtonpost.com/2012/03/05/the-12-smallest-colleges_n_1320774.html
 
-After I'm done visualizing the data in its raw form, I may employ some
-unsupervised clustering to see if there are any characteristics that broadly
-distinguish universities. After this, I will move on to regression, using
-linear/polynomial and decision tree regressors along with ensemble methods to
-attempt to predict the graduation rates and tuition costs.
+Having selected the appropriate features, I will move on to regression, using the earlier mentioned models, namely,
+stochastic gradient descent, AdaBoost, support vectors and random
+forests. I will compare their performance with the above-described metrics, and
+will, and then draw conclusions from my experiments.
 
+
+\pagebreak
 
 ## Bibliography
